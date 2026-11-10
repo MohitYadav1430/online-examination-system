@@ -6,7 +6,18 @@ const Attempt = require("../models/Attempt");
 // =====================================
 const createExam = async (req, res) => {
   try {
-    const { title, description, duration, questions } = req.body;
+    const {
+      title,
+      description,
+      duration,
+      questions,
+      maxAttempts = 1,
+      allowReattempt = false,
+      reattemptApprovalRequired = true,
+      shuffleQuestions = false,
+      negativeMarking = false,
+      negativeMarks = 0,
+    } = req.body;
 
     if (
       !title?.trim() ||
@@ -18,6 +29,18 @@ const createExam = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please provide valid examination details.",
+      });
+    }
+
+    if (
+      !Number.isInteger(Number(maxAttempts)) ||
+      Number(maxAttempts) < 1 ||
+      !Number.isFinite(Number(negativeMarks)) ||
+      Number(negativeMarks) < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid attempt limit or negative marking value.",
       });
     }
 
@@ -52,12 +75,21 @@ const createExam = async (req, res) => {
       description: description || "",
       duration: Number(duration),
       totalMarks,
+
       questions: questions.map((question) => ({
         questionText: question.questionText.trim(),
         options: question.options.map((option) => option.trim()),
         correctOption: Number(question.correctOption),
         marks: Number(question.marks),
       })),
+
+      maxAttempts: Number(maxAttempts),
+      allowReattempt: Boolean(allowReattempt),
+      reattemptApprovalRequired: Boolean(reattemptApprovalRequired),
+      shuffleQuestions: Boolean(shuffleQuestions),
+      negativeMarking: Boolean(negativeMarking),
+      negativeMarks: Number(negativeMarks),
+
       createdBy: req.user._id,
     });
 
@@ -67,6 +99,8 @@ const createExam = async (req, res) => {
       exam,
     });
   } catch (error) {
+    console.error("Create Exam Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -229,7 +263,18 @@ const getExamDetails = async (req, res) => {
 // =====================================
 const updateExam = async (req, res) => {
   try {
-    const { title, description, duration, questions } = req.body;
+    const {
+      title,
+      description,
+      duration,
+      questions,
+      maxAttempts = 1,
+      allowReattempt = false,
+      reattemptApprovalRequired = true,
+      shuffleQuestions = false,
+      negativeMarking = false,
+      negativeMarks = 0,
+    } = req.body;
 
     const exam = await Exam.findOne({
       _id: req.params.id,
@@ -243,7 +288,6 @@ const updateExam = async (req, res) => {
       });
     }
 
-    // Prevent changes to exams with existing attempts.
     const existingAttempts = await Attempt.countDocuments({
       exam: exam._id,
     });
@@ -251,7 +295,8 @@ const updateExam = async (req, res) => {
     if (existingAttempts > 0) {
       return res.status(409).json({
         success: false,
-        message: "This exam cannot be edited because students have already attempted it.",
+        message:
+          "This exam cannot be edited because students have already attempted it.",
       });
     }
 
@@ -265,6 +310,18 @@ const updateExam = async (req, res) => {
       return res.status(400).json({
         success: false,
         message: "Please provide valid examination details.",
+      });
+    }
+
+    if (
+      !Number.isInteger(Number(maxAttempts)) ||
+      Number(maxAttempts) < 1 ||
+      !Number.isFinite(Number(negativeMarks)) ||
+      Number(negativeMarks) < 0
+    ) {
+      return res.status(400).json({
+        success: false,
+        message: "Invalid attempt limit or negative marking value.",
       });
     }
 
@@ -305,6 +362,15 @@ const updateExam = async (req, res) => {
       0
     );
 
+    exam.maxAttempts = Number(maxAttempts);
+    exam.allowReattempt = Boolean(allowReattempt);
+    exam.reattemptApprovalRequired = Boolean(
+      reattemptApprovalRequired
+    );
+    exam.shuffleQuestions = Boolean(shuffleQuestions);
+    exam.negativeMarking = Boolean(negativeMarking);
+    exam.negativeMarks = Number(negativeMarks);
+
     await exam.save();
 
     res.status(200).json({
@@ -313,6 +379,8 @@ const updateExam = async (req, res) => {
       exam,
     });
   } catch (error) {
+    console.error("Update Exam Error:", error);
+
     res.status(500).json({
       success: false,
       message: error.message,
@@ -379,61 +447,138 @@ const startExam = async (req, res) => {
       });
     }
 
-    // Check existing attempt
-    const existingAttempt = await Attempt.findOne({
+    // Check existing active attempt
+    const activeAttempt = await Attempt.findOne({
+      student: req.user._id,
+      exam: examId,
+      status: "in-progress",
+    }).sort({ startedAt: -1 });
+
+    // Resume existing attempt
+    if (activeAttempt) {
+      if (new Date() >= new Date(activeAttempt.expiresAt)) {
+        return res.status(409).json({
+          success: false,
+          message: "Your previous attempt has expired.",
+          attemptId: activeAttempt._id,
+        });
+      }
+
+      const savedOrder = activeAttempt.questionOrder?.length
+        ? activeAttempt.questionOrder
+        : exam.questions.map((q) => q._id);
+
+      const questions = savedOrder
+        .map((questionId) => exam.questions.id(questionId))
+        .filter(Boolean)
+        .map((question) => ({
+          _id: question._id,
+          questionText: question.questionText,
+          options: question.options,
+          marks: question.marks,
+        }));
+
+      return res.status(200).json({
+        success: true,
+        message: "Exam resumed successfully.",
+        attemptId: activeAttempt._id,
+        attempt: {
+          _id: activeAttempt._id,
+          expiresAt: activeAttempt.expiresAt,
+          answers: activeAttempt.answers,
+          attemptNumber: activeAttempt.attemptNumber,
+        },
+        exam: {
+          id: exam._id,
+          title: exam.title,
+          duration: exam.duration,
+          totalMarks: exam.totalMarks,
+          questions,
+        },
+        startedAt: activeAttempt.startedAt,
+        expiresAt: activeAttempt.expiresAt,
+      });
+    }
+
+    // Count previous attempts
+    const totalAttempts = await Attempt.countDocuments({
       student: req.user._id,
       exam: examId,
     });
 
-    // If exam already submitted
-    if (existingAttempt && existingAttempt.status === "submitted") {
-      return res.status(409).json({
+    if (totalAttempts >= exam.maxAttempts) {
+      return res.status(403).json({
         success: false,
-        message: "You have already attempted this exam.",
+        message: "You have reached the maximum number of attempts.",
       });
     }
 
-    let attempt = existingAttempt;
-
-    // Create new attempt only if no previous attempt exists
-    if (!attempt) {
-      const startedAt = new Date();
-
-      const expiresAt = new Date(
-        startedAt.getTime() + exam.duration * 60 * 1000
-      );
-
-      attempt = await Attempt.create({
-        student: req.user._id,
-        exam: exam._id,
-        totalMarks: exam.totalMarks,
-        startedAt,
-        expiresAt,
+    if (totalAttempts > 0 && !exam.allowReattempt) {
+      return res.status(403).json({
+        success: false,
+        message: "Reattempt is not allowed for this examination.",
       });
     }
 
-    // Hide correct answers from students
-    const questions = exam.questions.map((question) => ({
-      _id: question._id,
-      questionText: question.questionText,
-      options: question.options,
-      marks: question.marks,
-    }));
+    if (totalAttempts > 0 && exam.reattemptApprovalRequired) {
+      return res.status(403).json({
+        success: false,
+        message: "Admin approval is required for reattempt.",
+        approvalRequired: true,
+      });
+    }
+
+    // Prepare question order
+    let questionOrder = exam.questions.map((q) => q._id);
+
+    if (exam.shuffleQuestions) {
+      for (let i = questionOrder.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+
+        [questionOrder[i], questionOrder[j]] = [
+          questionOrder[j],
+          questionOrder[i],
+        ];
+      }
+    }
+
+    const startedAt = new Date();
+
+    const expiresAt = new Date(
+      startedAt.getTime() + exam.duration * 60 * 1000
+    );
+
+    // Create attempt with saved question order
+    const attempt = await Attempt.create({
+      student: req.user._id,
+      exam: exam._id,
+      attemptNumber: totalAttempts + 1,
+      questionOrder,
+      totalMarks: exam.totalMarks,
+      startedAt,
+      expiresAt,
+    });
+
+    const questions = questionOrder
+      .map((questionId) => exam.questions.id(questionId))
+      .filter(Boolean)
+      .map((question) => ({
+        _id: question._id,
+        questionText: question.questionText,
+        options: question.options,
+        marks: question.marks,
+      }));
 
     res.status(200).json({
       success: true,
-      message: existingAttempt
-        ? "Exam resumed successfully."
-        : "Exam started successfully.",
-
+      message: "Exam started successfully.",
       attemptId: attempt._id,
-
       attempt: {
         _id: attempt._id,
         expiresAt: attempt.expiresAt,
         answers: attempt.answers,
+        attemptNumber: attempt.attemptNumber,
       },
-
       exam: {
         id: exam._id,
         title: exam.title,
@@ -441,11 +586,9 @@ const startExam = async (req, res) => {
         totalMarks: exam.totalMarks,
         questions,
       },
-
       startedAt: attempt.startedAt,
       expiresAt: attempt.expiresAt,
     });
-
   } catch (error) {
     console.error("Start Exam Error:", error);
 
@@ -455,6 +598,8 @@ const startExam = async (req, res) => {
     });
   }
 };
+
+
 
 // =====================================
 // SUBMIT EXAM
@@ -504,8 +649,6 @@ const submitExam = async (req, res) => {
       });
     }
 
-    // Expired exam: use only MongoDB saved answers
-    // Active exam: use submitted answers if provided
     const submittedAnswers = isTimeExpired
       ? attempt.answers
       : answers !== undefined
@@ -555,14 +698,40 @@ const submitExam = async (req, res) => {
     }
 
     let score = 0;
+    let correctAnswers = 0;
+    let wrongAnswers = 0;
+    let unattemptedAnswers = 0;
 
-    for (const answer of submittedAnswers) {
-      const question = exam.questions.id(answer.questionId);
+    const answeredQuestions = new Map(
+      submittedAnswers.map((answer) => [
+        answer.questionId.toString(),
+        answer.selectedOption,
+      ])
+    );
 
-      if (question.correctOption === answer.selectedOption) {
+    for (const question of exam.questions) {
+      const selectedOption = answeredQuestions.get(
+        question._id.toString()
+      );
+
+      if (selectedOption === undefined) {
+        unattemptedAnswers++;
+        continue;
+      }
+
+      if (question.correctOption === selectedOption) {
         score += question.marks;
+        correctAnswers++;
+      } else {
+        wrongAnswers++;
+
+        if (exam.negativeMarking) {
+          score -= exam.negativeMarks;
+        }
       }
     }
+
+    score = Math.max(0, Number(score.toFixed(2)));
 
     attempt.answers = submittedAnswers;
     attempt.score = score;
@@ -576,10 +745,16 @@ const submitExam = async (req, res) => {
       message: isTimeExpired
         ? "Exam auto-submitted because time expired."
         : "Exam submitted successfully.",
+
       result: {
         attemptId: attempt._id,
+        attemptNumber: attempt.attemptNumber,
         score: attempt.score,
         totalMarks: attempt.totalMarks,
+        correctAnswers,
+        wrongAnswers,
+        unattemptedAnswers,
+        negativeMarking: exam.negativeMarking,
         submittedAt: attempt.submittedAt,
         status: attempt.status,
       },

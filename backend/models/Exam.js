@@ -57,6 +57,38 @@ const examSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+
+    maxAttempts: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+
+    allowReattempt: {
+      type: Boolean,
+      default: false,
+    },
+
+    reattemptApprovalRequired: {
+      type: Boolean,
+      default: true,
+    },
+
+    shuffleQuestions: {
+      type: Boolean,
+      default: false,
+    },
+
+    negativeMarking: {
+      type: Boolean,
+      default: false,
+    },
+
+    negativeMarks: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
   },
   {
     timestamps: true,

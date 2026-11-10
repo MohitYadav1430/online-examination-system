@@ -14,6 +14,19 @@ const attemptSchema = new mongoose.Schema(
       required: true,
     },
 
+    attemptNumber: {
+      type: Number,
+      default: 1,
+      min: 1,
+    },
+    
+    questionOrder: [
+  {
+    type: mongoose.Schema.Types.ObjectId,
+    required: true,
+  },
+],
+
     answers: [
       {
         questionId: {
@@ -63,5 +76,9 @@ const attemptSchema = new mongoose.Schema(
     timestamps: true,
   }
 );
+
+// Indexes for faster student and exam history queries
+attemptSchema.index({ student: 1, exam: 1, attemptNumber: 1 });
+attemptSchema.index({ student: 1, status: 1 });
 
 module.exports = mongoose.model("Attempt", attemptSchema);

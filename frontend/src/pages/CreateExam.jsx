@@ -9,6 +9,13 @@ function CreateExam() {
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
   const [duration, setDuration] = useState(30);
+  // Exam Settings
+const [maxAttempts, setMaxAttempts] = useState(1);
+const [allowReattempt, setAllowReattempt] = useState(false);
+const [reattemptApprovalRequired, setReattemptApprovalRequired] = useState(true);
+const [shuffleQuestions, setShuffleQuestions] = useState(false);
+const [negativeMarking, setNegativeMarking] = useState(false);
+const [negativeMarks, setNegativeMarks] = useState(0);
 
   const [questions, setQuestions] = useState([
     {
@@ -126,11 +133,18 @@ function CreateExam() {
         title: title.trim(),
         description: description.trim(),
         duration: Number(duration),
-        questions: questions.map((q) => ({
-          questionText: q.questionText.trim(),
-          options: q.options.map((option) => option.trim()),
-          correctOption: Number(q.correctOption),
-          marks: Number(q.marks),
+
+          maxAttempts: Number(maxAttempts),
+          allowReattempt,
+          reattemptApprovalRequired,
+          shuffleQuestions,
+          negativeMarking,
+          negativeMarks: Number(negativeMarks),
+          questions: questions.map((q) => ({
+           questionText: q.questionText.trim(),
+           options: q.options.map((option) => option.trim()),
+           correctOption: Number(q.correctOption),
+           marks: Number(q.marks),
         })),
       };
 
@@ -244,6 +258,83 @@ function CreateExam() {
             />
 
           </div>
+          {/* Exam Settings */}
+<div className="bg-white p-6 rounded-xl shadow-sm mb-8">
+  <h2 className="text-xl font-bold mb-6">Exam Settings</h2>
+
+  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+    <div>
+      <label className="block font-medium mb-2">
+        Maximum Attempts
+      </label>
+      <input
+        type="number"
+        min="1"
+        value={maxAttempts}
+        onChange={(e) => setMaxAttempts(Number(e.target.value))}
+        className="w-full border p-3 rounded-lg"
+      />
+    </div>
+
+    <div>
+      <label className="block font-medium mb-2">
+        Negative Marks (per wrong answer)
+      </label>
+      <input
+        type="number"
+        min="0"
+        step="0.25"
+        value={negativeMarks}
+        onChange={(e) => setNegativeMarks(Number(e.target.value))}
+        disabled={!negativeMarking}
+        className="w-full border p-3 rounded-lg disabled:bg-slate-100"
+      />
+    </div>
+
+    <label className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        checked={shuffleQuestions}
+        onChange={(e) => setShuffleQuestions(e.target.checked)}
+        className="w-5 h-5"
+      />
+      <span className="font-medium">Shuffle Questions</span>
+    </label>
+
+    <label className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        checked={negativeMarking}
+        onChange={(e) => setNegativeMarking(e.target.checked)}
+        className="w-5 h-5"
+      />
+      <span className="font-medium">Enable Negative Marking</span>
+    </label>
+
+    <label className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        checked={allowReattempt}
+        onChange={(e) => setAllowReattempt(e.target.checked)}
+        className="w-5 h-5"
+      />
+      <span className="font-medium">Allow Reattempt</span>
+    </label>
+
+    <label className="flex items-center gap-3">
+      <input
+        type="checkbox"
+        checked={reattemptApprovalRequired}
+        onChange={(e) => setReattemptApprovalRequired(e.target.checked)}
+        disabled={!allowReattempt}
+        className="w-5 h-5"
+      />
+      <span className="font-medium">Require Admin Approval for Reattempt</span>
+    </label>
+
+  </div>
+</div>
 
           {/* Questions Header */}
           <div className="flex justify-between items-center mb-6">
