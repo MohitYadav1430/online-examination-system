@@ -14,7 +14,7 @@ import AdminAnalytics from "./pages/AdminAnalytics";
 import StudentManagement from "./pages/StudentManagement";
 import StudentHistory from "./pages/StudentHistory";
 
-import StudentDashboard from "./pages/StudentDashboard";
+import StudentDashboard from "./pages/Studentdashboard.jsx";
 import ExamPage from "./pages/ExamPage";
 import ResultPage from "./pages/ResultPage";
 
