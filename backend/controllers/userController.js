@@ -136,10 +136,46 @@ const getStudentExamHistory = async (req, res) => {
     });
   }
 };
+// Clear All Exam Attempts of a Student
+const clearStudentAttempts = async (req, res) => {
+  try {
+    const { studentId } = req.params;
+
+    const student = await User.findOne({
+      _id: studentId,
+      role: "student",
+    });
+
+    if (!student) {
+      return res.status(404).json({
+        success: false,
+        message: "Student not found",
+      });
+    }
+
+    const result = await Attempt.deleteMany({
+      student: studentId,
+    });
+
+    res.status(200).json({
+      success: true,
+      message: "Student exam attempts cleared successfully",
+      deletedAttempts: result.deletedCount,
+    });
+  } catch (error) {
+    console.error("Clear Student Attempts Error:", error);
+
+    res.status(500).json({
+      success: false,
+      message: "Failed to clear student attempts",
+    });
+  }
+};
 
 module.exports = {
   getAllStudents,
   toggleStudentStatus,
   deleteStudent,
+  clearStudentAttempts,
   getStudentExamHistory,
 };

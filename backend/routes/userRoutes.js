@@ -6,6 +6,7 @@ const {
   toggleStudentStatus,
   deleteStudent,
   getStudentExamHistory,
+  clearStudentAttempts,
 } = require("../controllers/userController");
 
 const { protect } = require("../middleware/authMiddleware");
@@ -13,6 +14,13 @@ const { adminOnly } = require("../middleware/adminMiddleware");
 
 // All routes are accessible only to Admin
 router.get("/students", protect, adminOnly, getAllStudents);
+// Clear Student Exam Attempts (Admin Only)
+router.delete(
+  "/students/:studentId/attempts",
+  protect,
+  adminOnly,
+  clearStudentAttempts
+);
 
 router.patch(
   "/students/:studentId/status",
