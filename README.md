@@ -119,3 +119,16 @@ MongoDB Atlas is used for storing user accounts, examinations and examination at
 Mohit Yadav
 
 B.Tech – Computer Science and Engineering
+
+## 📸 Project Screenshots
+
+### 1. Login Page
+![Login Page](./login-page.png)
+
+### 2. Admin Dashboard
+![Admin Dashboard](./admin-dashboard.png)
+
+*Note: Dashboard statistics are sample/demo data.*
+
+### 3. Student Dashboard
+![Student Dashboard](./student-dashboard.png)
