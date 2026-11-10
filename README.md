@@ -1,6 +1,17 @@
 # Online Examination System
 
 A Full Stack MERN-based Online Examination System that allows administrators to create and manage examinations and students to attempt exams online and view their results.
+<div align="center">
+
+<a href="https://online-examination-frontend-c7zx.onrender.com">
+<img src="https://img.shields.io/badge/🚀_LIVE_DEMO-Visit_Website-2EA44F?style=for-the-badge" />
+</a>
+
+<a href="https://github.com/MohitYadav1430/online-examination-system">
+<img src="https://img.shields.io/badge/GitHub-Source_Code-181717?style=for-the-badge&logo=github" />
+</a>
+
+</div>
 
 ## Features
 
