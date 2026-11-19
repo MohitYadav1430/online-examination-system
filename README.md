@@ -1,145 +1,150 @@
-# Online Examination System
+# Online Examination System 🎓
 
-A Full Stack MERN-based Online Examination System that allows administrators to create and manage examinations and students to attempt exams online and view their results.
+A modern, robust Full-Stack MERN (MongoDB, Express, React, Node.js) based **Online Examination System**. Designed to streamline the examination lifecycle for institutions, schools, and organizations by providing intuitive portals for both administrators and students.
+
 <div align="center">
 
-<a href="https://online-examination-frontend-c7zx.onrender.com">
-<img src="https://img.shields.io/badge/🚀_LIVE_DEMO-Visit_Website-2EA44F?style=for-the-badge" />
-</a>
-
-<a href="https://github.com/MohitYadav1430/online-examination-system">
-<img src="https://img.shields.io/badge/GitHub-Source_Code-181717?style=for-the-badge&logo=github" />
-</a>
+[![Repository](https://img.shields.io/badge/GitHub-Repository-181717?style=for-the-badge&logo=github)](https://github.com/divyanshkashyap129-svg/online-examination-system)
+[![Status](https://img.shields.io/badge/Status-Active-brightgreen?style=for-the-badge)](#)
+[![License](https://img.shields.io/badge/License-MIT-blue?style=for-the-badge)](#)
 
 </div>
 
-## Features
+---
 
-### Admin
-- Admin Login
-- Admin Dashboard
-- Create, Edit and Delete Exams
-- Publish and Unpublish Exams
-- View Student Results
-- View Student Answer Sheets
-- Analytics Dashboard
-- Student Management
-- Activate and Deactivate Student Accounts
-- View Student Examination History
+## 🚀 Key Features
 
-### Student
-- Student Registration and Login
-- Student Dashboard
-- View Available Examinations
-- Attempt Online Exams
-- Countdown Timer
-- Automatic Answer Saving
-- Refresh Recovery
-- Automatic and Manual Submission
-- View Examination Results
+### 👨‍🏫 Administrator Portal
+- **Secure Authentication**: Protected admin login with JWT verification and role-based access.
+- **Exam Management**: Seamlessly create, edit, update, delete, publish, and unpublish examinations.
+- **Question Bank**: Support for multiple choice questions (MCQs), configurable marks, time limits, and negative marking.
+- **Real-Time Analytics & Reporting**: Overview of participants, passing ratios, score distributions, and performance graphs.
+- **Student Monitoring & Answer Sheets**: Inspect detailed student submissions, automated grade calculation, and student audit history.
+- **User Management**: Activate/deactivate student accounts and manage enrollment.
 
-## Technology Stack
+### 👨‍🎓 Student Portal
+- **Registration & Profile**: Self-registration and secure login.
+- **Exam Hall & Live Test Interface**: Clean, distraction-free environment to attempt available online examinations.
+- **Smart Timer & Auto-Save**: Real-time synchronized countdown timer with auto-saving of selected answers.
+- **Recovery & Auto-Submission**: Resilient against unexpected page refreshes; automatic paper submission when the timer lapses.
+- **Instant Feedback**: View instant scores, detailed performance breakdowns, and correct answers post-submission.
 
-### Frontend
-- React.js
-- Vite
-- Tailwind CSS
-- Axios
-- React Router DOM
-- Lucide React
+---
 
-### Backend
-- Node.js
-- Express.js
-- MongoDB
-- Mongoose
-- JWT Authentication
-- bcryptjs
+## 🛠️ Tech Stack
 
-## Project Structure
+| Domain | Technologies & Libraries |
+| :--- | :--- |
+| **Frontend** | React 18, Vite, Tailwind CSS, Lucide Icons, Axios, React Router DOM |
+| **Backend** | Node.js, Express.js, RESTful API architecture |
+| **Database** | MongoDB & Mongoose ODM |
+| **Security & Auth** | JSON Web Tokens (JWT), bcryptjs password hashing, CORS, Helmet |
+
+---
+
+## 📂 Project Architecture
 
 ```text
-Online-Examination-System/
+online-examination-system/
 │
 ├── backend/
-│   ├── config/
-│   ├── controllers/
-│   ├── middleware/
-│   ├── models/
-│   ├── routes/
-│   ├── server.js
+│   ├── config/          # Database connection & environment configuration
+│   ├── controllers/     # API request handlers (Auth, Exam, Question, Result)
+│   ├── middleware/      # JWT auth, error handling & role checks
+│   ├── models/          # Mongoose database schemas
+│   ├── routes/          # Express route definitions
+│   ├── server.js        # Server entry point
 │   └── package.json
 │
 ├── frontend/
-│   ├── public/
+│   ├── public/          # Static assets & favicon
 │   ├── src/
-│   │   ├── components/
-│   │   ├── pages/
-│   │   └── services/
+│   │   ├── components/  # Reusable UI elements (Navbar, Modals, Cards)
+│   │   ├── pages/       # Admin & Student view views
+│   │   ├── services/    # Axios API client services
+│   │   └── App.jsx      # Root routing & layout
 │   └── package.json
 │
-└── .gitignore
+├── admin-dashboard.png  # Admin view preview
+├── student-dashboard.png# Student view preview
+├── login-page.png       # Auth preview
+└── README.md
 ```
 
-## Installation
+---
 
-### 1. Clone Repository
+## ⚡ Getting Started
 
+Follow these steps to set up and run the project locally.
+
+### Prerequisites
+- [Node.js](https://nodejs.org/) (v16.x or higher)
+- [MongoDB](https://www.mongodb.com/) (Local Community Server or MongoDB Atlas cluster)
+- [Git](https://git-scm.com/)
+
+### 1. Clone the Repository
 ```bash
-git clone https://github.com/MohitYadav1430/online-examination-system.git
+git clone https://github.com/divyanshkashyap129-svg/online-examination-system.git
+cd online-examination-system
 ```
 
-### 2. Backend Setup
-
+### 2. Configure Backend
+Navigate to the `backend` directory and install dependencies:
 ```bash
-cd online-examination-system/backend
+cd backend
 npm install
 ```
 
-Create a `.env` file inside the backend folder and configure:
-
+Create a `.env` file in the `backend/` directory:
 ```env
 PORT=5000
 MONGO_URI=your_mongodb_connection_string
-JWT_SECRET=your_jwt_secret
-ADMIN_SECRET=your_admin_secret
+JWT_SECRET=your_super_secret_jwt_key
+ADMIN_SECRET=your_admin_secret_key
 ```
 
-Start backend:
-
+Start the backend server:
 ```bash
 npm run dev
+# Server will run at http://localhost:5000
 ```
 
-### 3. Frontend Setup
-
-Open another terminal:
-
+### 3. Configure Frontend
+Open a new terminal tab, navigate to the `frontend` folder and install dependencies:
 ```bash
-cd online-examination-system/frontend
+cd frontend
 npm install
-npm run dev
 ```
 
-## Database
+Create a `.env` file in the `frontend/` folder (if custom API URL is required):
+```env
+VITE_API_URL=http://localhost:5000/api
+```
 
-MongoDB Atlas is used for storing user accounts, examinations and examination attempts.
+Start the Vite development server:
+```bash
+npm run dev
+# Frontend will be live at http://localhost:5173
+```
 
-## Author
+---
 
-Mohit Yadav
+## 📸 Screenshots
 
-B.Tech – Computer Science and Engineering
+| Portal | Preview |
+| :--- | :--- |
+| **Authentication** | ![Login Page](./login-page.png) |
+| **Admin Dashboard** | ![Admin Dashboard](./admin-dashboard.png) |
+| **Student Dashboard** | ![Student Dashboard](./student-dashboard.png) |
 
-## 📸 Project Screenshots
+---
 
-### 1. Login Page
-![Login Page](./login-page.png)
+## 👤 Maintainer
 
-### 2. Admin Dashboard
-![Admin Dashboard](./admin-dashboard.png)
+**Divyansh Kashyap**  
+- GitHub: [@divyanshkashyap129-svg](https://github.com/divyanshkashyap129-svg)
 
-*Note: Dashboard statistics are sample/demo data.*
+---
 
-### 3. Student Dashboard
-![Student Dashboard](./student-dashboard.png)
+## 📄 License
+This project is open-source and available under the [MIT License](LICENSE).
